@@ -1,3 +1,5 @@
+#Gerekli kütüphaneleri kod dosyasındaki uygun python sürümüne entegre eder.
+
 import discord
 from discord.ext import commands
 from discord import ui, ButtonStyle, TextStyle
