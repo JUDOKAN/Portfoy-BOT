@@ -1,16 +1,29 @@
+#Gerekli kütüphanelerin kod dosyasının içine aktarılması.
+
 import sqlite3
 from config import DATABASE
+
+#Bazı tablo oluşumları
 
 skills = [ (_,) for _ in (['Python', 'SQL', 'API', 'Discord']) ]
 statuses = [ (_,) for _ in (['Prototip Oluşturma', 'Geliştirme Aşamasında', 'Tamamlandı, kullanıma hazır', 'Güncellendi', 'Tamamlandı, ancak bakımı yapılmadı']) ]
 
+#Database bağlantısı
+
 class DB_Manager:
     def __init__(self, database):
         self.database = database
+    
+    #Tablo oluşturma
+        
+        
 
     def create_tables(self):
         conn = sqlite3.connect(self.database)
         with conn:
+
+            #Projects tablosu  
+
             conn.execute('''CREATE TABLE IF NOT EXISTS projects (
                             project_id INTEGER PRIMARY KEY AUTOINCREMENT,
                             user_id INTEGER,
@@ -20,10 +33,16 @@ class DB_Manager:
                             status_id INTEGER,
                             FOREIGN KEY(status_id) REFERENCES status(status_id)
                         )''') 
+
+           #Skills tablosu
+
             conn.execute('''CREATE TABLE IF NOT EXISTS skills (
                             skill_id INTEGER PRIMARY KEY AUTOINCREMENT,
                             skill_name TEXT UNIQUE
                         )''')
+
+            #project_skills tablosu
+
             conn.execute('''CREATE TABLE IF NOT EXISTS project_skills (
                             project_id INTEGER,
                             skill_id INTEGER,
@@ -31,14 +50,23 @@ class DB_Manager:
                             FOREIGN KEY(skill_id) REFERENCES skills(skill_id),
                             PRIMARY KEY (project_id, skill_id)
                         )''')
+
+            #status tablosu
+
             conn.execute('''CREATE TABLE IF NOT EXISTS status (
                             status_id INTEGER PRIMARY KEY AUTOINCREMENT,
                             status_name TEXT UNIQUE
                         )''')
+
+            #users tablosu
+
             conn.execute('''CREATE TABLE IF NOT EXISTS users (
                             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
                             user_name TEXT UNIQUE
                         )''')
+
+            #usets_projects tablosu
+
             conn.execute('''CREATE TABLE IF NOT EXISTS user_projects (
                             user_id INTEGER,
                             project_id INTEGER,
@@ -48,6 +76,8 @@ class DB_Manager:
                         )''')
             
             conn.commit()
+
+    #sql sorguları
 
     def __executemany(self, sql, data):
         conn = sqlite3.connect(self.database)
@@ -128,6 +158,8 @@ class DB_Manager:
     def delete_skill(self, project_id, skill_id):
         sql = "DELETE FROM project_skills WHERE project_id = ? AND skill_id = ?"
         self.__executemany(sql, [(project_id, skill_id)])
+
+#kodun doğru düzgün çalışması için  komut
 
 if __name__ == '__main__':
     manager = DB_Manager(DATABASE)
