@@ -1,18 +1,30 @@
+#Gerekli kütüphanelerin kod dosyasının içine aktarılması 
+
 import discord
 from discord.ext import commands
 from logic import DB_Manager
 from config import DATABASE, TOKEN
 
+#İntents açıklamaları
+
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
 
+#Botun asıl komut başlangıcı ve DB
+
 bot = commands.Bot(command_prefix='!', intents=intents)
 manager = DB_Manager(DATABASE)
+
+#Botun temel yapısnın oluşturulması
+
+    #Botun discordda aktif olmasını sağlayan kod   
 
 @bot.event
 async def on_ready():
     print(f'Bot hazır! {bot.user} olarak giriş yapıldı.')
+
+    #Botun açıklayıcı metini
 
 @bot.command(name='start')
 async def start_command(ctx):
@@ -22,6 +34,8 @@ Seninle tanıştığıma çok memnun oldum! Benim görevim, projelerini en düze
 Her şeyi kayıt altında tutmak, düzenlemek ve sana hatırlatmak için buradayım. 📝
 Hazırsan başlayalım, birlikte harika işler başaracağız! 🚀""")
     await info(ctx)
+
+    #Botun discorda yazılması gereken komutları ve bu komutların ne işe yaradıkları.
 
 @bot.command(name='info')
 async def info(ctx):
@@ -39,6 +53,8 @@ Kullanabileceğiniz komutlar:
 Ayrıca proje adını yazarak detaylarını görüntüleyebilirsin!
 """)
 
+    #Kodun discordda yeni proje oluşturmasını sağlayan komut.
+
 @bot.command(name='new_project')
 async def new_project(ctx):
     await ctx.send("Lütfen projenin adını girin!")
@@ -51,7 +67,7 @@ async def new_project(ctx):
     await ctx.send("Projenin bağlantısını girin!")
     link = await bot.wait_for('message', check=check)
 
-    statuses = [x[1] for x in manager.get_all_statuses()]  # get_all_statuses kullanılıyor
+    statuses = [x[1] for x in manager.get_all_statuses()] 
     await ctx.send("Durum seçin:\n" + "\n".join(statuses))
     status = await bot.wait_for('message', check=check)
     if status.content not in statuses:
@@ -63,6 +79,8 @@ async def new_project(ctx):
     manager.insert_project(*data)
     await ctx.send("Proje başarıyla kaydedildi!")
 
+    #Kodun kendi dbsine kaydettiği projeyi bu komut yazılınca tüm kaydedilen projeleri göstermesi
+
 @bot.command(name='projects')
 async def get_projects(ctx):
     user_id = ctx.author.id
@@ -72,6 +90,8 @@ async def get_projects(ctx):
             await ctx.send(f"Proje: {p[2]}\nBağlantı: {p[4]}")
     else:
         await ctx.send("Henüz projeye sahip değilsin. !new_project ile oluşturabilirsin.")
+
+        #Bu komut orıjenin içindeki yazılım dillerinden bahseder
 
 @bot.command(name='skills')
 async def skills(ctx):
@@ -99,6 +119,9 @@ async def skills(ctx):
     manager.insert_skill(user_id, pname.content, skill.content)
     await ctx.send(f"{pname.content} projesine {skill.content} becerisi eklendi!")
 
+
+    #İstenilen projenin silinmesi
+
 @bot.command(name='delete')
 async def delete_project(ctx):
     user_id = ctx.author.id
@@ -118,6 +141,8 @@ async def delete_project(ctx):
     pid = manager.get_project_id(pname.content, user_id)
     manager.delete_project(user_id, pid)
     await ctx.send(f"{pname.content} projesi silindi.")
+
+    #Projenin güncellenmesini sağlayan komut
 
 @bot.command(name='update_projects')
 async def update_projects(ctx):
@@ -160,6 +185,9 @@ async def update_projects(ctx):
     manager.update_projects(attributes[attr.content], (update_value, pname.content, user_id))
     await ctx.send("Proje başarıyla güncellendi!")
 
+
+    #Kullanıcıların listesini gösteren komut.
+
 @bot.command(name='users')
 async def list_users(ctx):
     users = manager.get_users()
@@ -167,6 +195,8 @@ async def list_users(ctx):
         await ctx.send("Kullanıcı listesi:\n" + "\n".join([str(u[0]) for u in users]))
     else:
         await ctx.send("Kullanıcı bulunamadı.")
+
+        #Kullanıcıların projelerini gösteren komut
 
 @bot.command(name='users_projects')
 async def users_projects(ctx):
@@ -180,5 +210,7 @@ async def users_projects(ctx):
         await ctx.send(response)
     else:
         await ctx.send("Henüz hiçbir kullanıcı projesi eklememiş.")
+
+        #Botu discorda aktarak çalışmasını sağlayan komut.
 
 bot.run(TOKEN)
